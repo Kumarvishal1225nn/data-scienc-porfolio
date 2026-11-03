@@ -22,7 +22,12 @@ export function Hero() {
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const photoY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 70]);
+  const photoY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 140]);
+  const photoRotate = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 4]);
+  const textY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -90]);
+  const fade = useTransform(scrollYProgress, [0, 0.7], [1, reduce ? 1 : 0.15]);
+  const traceScale = useTransform(scrollYProgress, [0, 0.6], [1, reduce ? 1 : 0.94]);
+  const gridY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 160]);
 
   const enter = (delay: number) =>
     reduce
@@ -35,7 +40,7 @@ export function Hero() {
 
   return (
     <section ref={ref} id="home" aria-label="Introduction" className="relative overflow-hidden pb-16 pt-28 md:pb-24 md:pt-36">
-      <div className="grid-field pointer-events-none absolute inset-0" aria-hidden="true" />
+      <motion.div style={{ y: gridY }} className="grid-field pointer-events-none absolute inset-0" aria-hidden="true" />
       <div
         className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[900px] -translate-x-1/2 rounded-full bg-signal/10 blur-[120px]"
         aria-hidden="true"
@@ -43,7 +48,7 @@ export function Hero() {
 
       <div className="container-page relative">
         <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-16">
-          <div>
+          <motion.div style={{ y: textY, opacity: fade }}>
             <motion.p {...enter(0)} className="text-[15px] text-soft">
               Hello, I&apos;m Vishal.
             </motion.p>
@@ -96,9 +101,9 @@ export function Hero() {
                 Download resume
               </a>
             </motion.div>
-          </div>
+          </motion.div>
 
-          <motion.div {...enter(0.15)} style={{ y: photoY }} className="relative mx-auto w-full max-w-[460px] lg:max-w-none">
+          <motion.div {...enter(0.15)} style={{ y: photoY, rotate: photoRotate }} className="relative mx-auto w-full max-w-[460px] lg:max-w-none">
             {/*
               PROFILE PHOTO — replace /public/images/profile.jpg
               (or change siteConfig.profileImage). Portrait or square works best.
@@ -127,7 +132,7 @@ export function Hero() {
           </motion.div>
         </div>
 
-        <motion.div {...enter(0.45)} className="mt-14 md:mt-20">
+        <motion.div {...enter(0.45)} style={{ scale: traceScale }} className="mt-14 md:mt-20">
           <SignalTrace />
         </motion.div>
 

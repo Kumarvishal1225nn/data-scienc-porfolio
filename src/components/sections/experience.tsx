@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { ParallaxPhoto } from "../ui/parallax-photo";
 import { Award, Briefcase, FlaskConical, GraduationCap, School, type LucideIcon } from "lucide-react";
 import { education, experience } from "@/data/portfolio";
 import { Section, SectionHeading } from "../ui/section";
@@ -25,20 +25,19 @@ export function Experience() {
             <Reveal
               as="li"
               key={e.id}
-              delay={(i % 3) * 0.05}
+              delay={(i % 3) * 0.12}
+              variant={row === 0 ? (i === 0 ? "left" : "right") : "up"}
               className={`group flex flex-col overflow-hidden rounded-3xl border p-6 transition-all duration-300 hover:-translate-y-1 ${
                 lead ? "border-signal/40 bg-signal-soft" : "border-line bg-panel/60 hover:border-line-strong"
               }`}
             >
               {e.photo && (
                 <div className="relative -mx-6 -mt-6 mb-6 aspect-[16/10] overflow-hidden rounded-t-3xl border-b border-line">
-                  <Image
+                  <ParallaxPhoto
                     src={e.photo.src}
                     alt={e.photo.alt}
-                    fill
-                    sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 90vw"
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    style={{ objectPosition: e.photo.position ?? "50% 50%" }}
+                    position={e.photo.position}
+                    sizes="(min-width: 768px) 50vw, 90vw"
                   />
                   <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/70 to-transparent" aria-hidden="true" />
                 </div>
@@ -80,7 +79,8 @@ export function Experience() {
           <Reveal
             as="li"
             key={ed.id}
-            delay={i * 0.06}
+            delay={i * 0.1}
+            variant="zoom"
             className={`flex items-center gap-5 rounded-3xl border p-6 ${ed.current ? "border-ahead/40 bg-ahead-soft" : "border-line bg-panel/60"}`}
           >
             <span className={`grid size-12 shrink-0 place-items-center rounded-xl border ${ed.current ? "border-ahead/50 text-ahead" : "border-line text-soft"}`}>

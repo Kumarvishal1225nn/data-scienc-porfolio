@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 import { ArrowUpRight, ExternalLink, Maximize2, X } from "lucide-react";
 import { projects, type Project, type ProjectCategory } from "@/data/portfolio";
 import { Section, SectionHeading } from "../ui/section";
@@ -266,9 +266,16 @@ function ProjectDialog({ p, onClose }: { p: Project; onClose: () => void }) {
 /* ---------- Cards ---------- */
 
 function FeaturedCard({ p, onOpen }: { p: Project; onOpen: () => void }) {
+  const ref = useRef<HTMLElement>(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "start 35%"] });
+  const scale = useTransform(scrollYProgress, [0, 1], [reduce ? 1 : 0.88, 1]);
+  const radius = useTransform(scrollYProgress, [0, 1], [reduce ? 28 : 60, 28]);
   return (
     <Reveal>
-      <article
+      <motion.article
+        ref={ref}
+        style={{ scale, borderRadius: radius }}
         id={`project-${p.id}`}
         className="grid overflow-hidden rounded-[28px] border border-line bg-panel/70 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]"
       >
@@ -314,22 +321,42 @@ function FeaturedCard({ p, onOpen }: { p: Project; onOpen: () => void }) {
             <ProjectLinks p={p} />
           </div>
         </div>
-      </article>
+      </motion.article>
     </Reveal>
   );
 }
 
-function ProjectCard({ p, onOpen }: { p: Project; onOpen: () => void }) {
+function ProjectCard({ p, onOpen, i }: { p: Project; onOpen: () => void; i: number }) {
   const reduce = useReducedMotion();
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const rotX = useSpring(useTransform(my, [-0.5, 0.5], [7, -7]), { stiffness: 200, damping: 20 });
+  const rotY = useSpring(useTransform(mx, [-0.5, 0.5], [-9, 9]), { stiffness: 200, damping: 20 });
+  const onMove = (e: React.PointerEvent<HTMLElement>) => {
+    if (reduce || e.pointerType !== "mouse") return;
+    const r = e.currentTarget.getBoundingClientRect();
+    mx.set((e.clientX - r.left) / r.width - 0.5);
+    my.set((e.clientY - r.top) / r.height - 0.5);
+  };
+  const onLeave = () => {
+    mx.set(0);
+    my.set(0);
+  };
   return (
+    <motion.div
+      layout={!reduce}
+      className="h-full [perspective:900px]"
+      initial={reduce ? false : { opacity: 0, y: 60, rotateX: 18, scale: 0.94 }}
+      whileInView={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
+      viewport={{ once: true, margin: "0px 0px -8% 0px" }}
+      exit={reduce ? undefined : { opacity: 0, scale: 0.96 }}
+      transition={{ type: "spring", stiffness: 120, damping: 20, delay: (i % 3) * 0.12 }}
+    >
     <motion.article
       id={`project-${p.id}`}
-      layout={!reduce}
-      initial={reduce ? false : { opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={reduce ? undefined : { opacity: 0, scale: 0.96 }}
-      whileHover={reduce ? undefined : { y: -6 }}
-      transition={{ type: "spring", stiffness: 300, damping: 28 }}
+      onPointerMove={onMove}
+      onPointerLeave={onLeave}
+      style={reduce ? undefined : { rotateX: rotX, rotateY: rotY, transformPerspective: 900 }}
       className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-panel/70 transition-colors duration-300 hover:border-signal/40"
     >
       <div className="relative aspect-[16/10] overflow-hidden border-b border-line bg-deep">
@@ -362,6 +389,7 @@ function ProjectCard({ p, onOpen }: { p: Project; onOpen: () => void }) {
         </div>
       </div>
     </motion.article>
+    </motion.div>
   );
 }
 
@@ -405,8 +433,8 @@ export function Projects() {
 
       <motion.div layout className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         <AnimatePresence mode="popLayout">
-          {rest.map((p) => (
-            <ProjectCard key={p.id} p={p} onOpen={() => setOpenId(p.id)} />
+          {rest.map((p, i) => (
+            <ProjectCard key={p.id} p={p} i={i} onOpen={() => setOpenId(p.id)} />
           ))}
         </AnimatePresence>
       </motion.div>

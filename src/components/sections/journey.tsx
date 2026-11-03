@@ -46,7 +46,14 @@ export function Journey() {
               const reached = i <= active;
               const future = s.state === "future";
               return (
-                <li key={s.id} className="flex flex-col items-center text-center">
+                <motion.li
+                  key={s.id}
+                  className="flex flex-col items-center text-center"
+                  initial={reduce ? false : { opacity: 0, y: 30, scale: 0.6 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, margin: "0px 0px -10% 0px" }}
+                  transition={{ type: "spring", stiffness: 220, damping: 16, delay: 0.15 + i * 0.12 }}
+                >
                   <button
                     type="button"
                     role="tab"
@@ -84,7 +91,7 @@ export function Journey() {
                       {s.title}
                     </span>
                   </button>
-                </li>
+                </motion.li>
               );
             })}
           </ol>
