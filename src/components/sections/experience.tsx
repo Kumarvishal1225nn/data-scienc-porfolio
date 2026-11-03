@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Award, Briefcase, FlaskConical, GraduationCap, School, type LucideIcon } from "lucide-react";
 import { education, experience } from "@/data/portfolio";
 import { Section, SectionHeading } from "../ui/section";
@@ -15,8 +16,9 @@ export function Experience() {
     <Section id="experience" tone="deep">
       <SectionHeading id="experience" index="04" title="Experience & education" />
 
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {experience.map((e, i) => {
+      {[experience.filter((e) => e.photo), experience.filter((e) => !e.photo)].map((list, row) => (
+      <ul key={row} className={`grid gap-4 ${row === 0 ? "md:grid-cols-2" : "mt-4 sm:grid-cols-2 lg:grid-cols-3"}`}>
+        {list.map((e, i) => {
           const Icon = kindIcon[e.kind] ?? Briefcase;
           const lead = e.id === "annam";
           return (
@@ -24,10 +26,23 @@ export function Experience() {
               as="li"
               key={e.id}
               delay={(i % 3) * 0.05}
-              className={`group flex flex-col rounded-3xl border p-6 transition-all duration-300 hover:-translate-y-1 ${
-                lead ? "border-signal/40 bg-signal-soft sm:col-span-2 lg:col-span-1 lg:row-span-2" : "border-line bg-panel/60 hover:border-line-strong"
+              className={`group flex flex-col overflow-hidden rounded-3xl border p-6 transition-all duration-300 hover:-translate-y-1 ${
+                lead ? "border-signal/40 bg-signal-soft" : "border-line bg-panel/60 hover:border-line-strong"
               }`}
             >
+              {e.photo && (
+                <div className="relative -mx-6 -mt-6 mb-6 aspect-[16/10] overflow-hidden rounded-t-3xl border-b border-line">
+                  <Image
+                    src={e.photo.src}
+                    alt={e.photo.alt}
+                    fill
+                    sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 90vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    style={{ objectPosition: e.photo.position ?? "50% 50%" }}
+                  />
+                  <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/70 to-transparent" aria-hidden="true" />
+                </div>
+              )}
               <div className="flex items-center justify-between gap-3">
                 <span className={`grid size-11 place-items-center rounded-xl border ${lead ? "border-signal/50 text-signal" : "border-line text-soft group-hover:text-fg"}`}>
                   <Icon className="size-5" aria-hidden="true" />
@@ -58,6 +73,7 @@ export function Experience() {
           );
         })}
       </ul>
+      ))}
 
       <ul className="mt-4 grid gap-4 md:grid-cols-2">
         {education.map((ed, i) => (
