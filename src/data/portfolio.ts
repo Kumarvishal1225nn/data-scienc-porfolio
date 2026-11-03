@@ -48,12 +48,12 @@ export const journey: Milestone[] = [
     state: "done",
     icon: "flask",
     title: "Internships & research",
-    org: "C-DAC · BSERC · IIT Guwahati · Annam.AI",
+    org: "C-DAC · BSERC · IIT Ropar · Annam.AI",
     summary: "From training to a production ML pipeline.",
     details: [
       "C-DAC Patna — AI & Data Science (Dec 2025 – Jan 2026)",
       "Bharat Space Education Research Centre — intern",
-      "IIT Guwahati — summer research, Dr. Himanshu Gupta",
+      "IIT Ropar — summer research, Prof. Abhilasha Nanda",
       "Annam.AI, IIT Ropar — Data Analyst intern (May – Jul 2026)",
     ],
   },
@@ -270,6 +270,8 @@ export interface ExperienceItem {
   location?: string;
   points?: string[];
   certificateUrl?: string;
+  /** Optional photo shown at the top of the card. Files live in /public/images/experience/. */
+  photo?: { src: string; alt: string; position?: string };
 }
 
 export const experience: ExperienceItem[] = [
@@ -277,6 +279,7 @@ export const experience: ExperienceItem[] = [
     id: "annam",
     role: "Data Analyst Intern",
     org: "Annam.AI, IIT Ropar",
+    photo: { src: "/images/experience/annam.jpg", alt: "Vishal at the Annam.AI office, IIT Ropar", position: "60% 45%" },
     kind: "Internship",
     period: "May 2026 – Jul 2026",
     points: [
@@ -287,7 +290,8 @@ export const experience: ExperienceItem[] = [
   {
     id: "iitg",
     role: "Summer Research Intern",
-    org: "IIT Guwahati — under Dr. Himanshu Gupta",
+    org: "IIT Ropar — under Prof. Abhilasha Nanda",
+    photo: { src: "/images/experience/iit-ropar-research.jpg", alt: "Vishal with Prof. Abhilasha Nanda at IIT Ropar", position: "50% 30%" },
     kind: "Research",
   },
   {
