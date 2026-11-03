@@ -1,3 +1,12 @@
+import { siteConfig } from "@/config/site";
+
+const showcase = siteConfig.showcaseRepos.map((n) => n.toLowerCase());
+export const isShowcased = (name: string) => showcase.length === 0 || showcase.includes(name.toLowerCase());
+export const showcaseRank = (name: string) => {
+  const i = showcase.indexOf(name.toLowerCase());
+  return i === -1 ? 999 : i;
+};
+
 export interface GitHubRepo {
   id: number;
   name: string;
@@ -89,7 +98,7 @@ export async function fetchGitHub(username: string): Promise<GitHubPayload> {
     const raw = (await repoRes.json()) as RawRepo[];
 
     const repos: GitHubRepo[] = raw
-      .filter((r) => !r.fork && !r.archived && r.name.toLowerCase() !== user.login.toLowerCase())
+      .filter((r) => !r.fork && !r.archived && isShowcased(r.name))
       .map((r) => ({
         id: r.id,
         name: r.name,
@@ -102,7 +111,7 @@ export async function fetchGitHub(username: string): Promise<GitHubPayload> {
         updatedAt: r.pushed_at,
         topics: r.topics ?? [],
       }))
-      .sort((a, b) => b.stars - a.stars || +new Date(b.updatedAt) - +new Date(a.updatedAt));
+      .sort((a, b) => showcaseRank(a.name) - showcaseRank(b.name));
 
     return {
       ok: true,
