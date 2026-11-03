@@ -35,17 +35,28 @@ export const siteConfig = {
    * Rendered from ghchart.rshah.org using your username.
    */
   showContributionGraph: true,
+
+  /**
+   * Repositories shown in "Live from GitHub". Only these appear, in this
+   * order. Add a repo name here when you publish something new.
+   */
+  showcaseRepos: [
+    "Bike-Sharing-Demand-Prediction",
+    "Text-Sentiment-Analysis",
+    "Fake-news-Detection",
+    "-heart-disease-prediction-using-machine-learning-with-flask",
+    "Gender-recognition-using-voice",
+    "STUDENT_PERFORMANCE",
+  ] as readonly string[],
 } as const;
 
 export const githubUrl = `https://github.com/${siteConfig.githubUsername}`;
 
 export const navItems = [
   { id: "home", label: "Home" },
-  { id: "about", label: "About" },
   { id: "journey", label: "Journey" },
   { id: "skills", label: "Skills" },
   { id: "projects", label: "Projects" },
   { id: "experience", label: "Experience" },
-  { id: "education", label: "Education" },
   { id: "contact", label: "Contact" },
 ] as const;
