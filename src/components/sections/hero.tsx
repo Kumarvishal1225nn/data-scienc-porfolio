@@ -6,8 +6,17 @@ import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion
 import { ArrowDown, Download } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { SignalTrace } from "./signal-trace";
+import { Counter } from "../ui/counter";
 
-const roles = ["Data Analyst", "Business Analyst", "Machine Learning Enthusiast"];
+const roles = ["Data Analyst", "Business Analyst", "ML Engineer"];
+
+/* Verified numbers only — each comes from a project on this page. */
+const stats = [
+  { value: "143", label: "IoT sensors in production" },
+  { value: "100,000", label: "rows modelled" },
+  { value: "10K+", label: "sales transactions" },
+  { value: "0.991", label: "R² on sensor gaps" },
+];
 
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
@@ -48,12 +57,11 @@ export function Hero() {
               into decisions.
             </motion.h1>
 
-            <motion.p {...enter(0.18)} className="mt-7 max-w-[46ch] text-[1.1rem] leading-relaxed text-soft">
-              I am a Data Science &amp; Management student passionate about transforming complex data
-              into actionable business insights and intelligent solutions.
+            <motion.p {...enter(0.18)} className="mt-6 text-[1.05rem] text-soft">
+              MS Data Science &amp; Management · <span className="text-fg">IIT Ropar × IIM Amritsar</span>
             </motion.p>
 
-            <motion.ul {...enter(0.26)} className="mt-7 flex flex-wrap gap-2" aria-label="Roles">
+            <motion.ul {...enter(0.26)} className="mt-6 flex flex-wrap gap-2" aria-label="Roles">
               {roles.map((r) => (
                 <li key={r} className="rounded-full border border-line-strong px-3.5 py-1.5 text-[13px] text-soft">
                   {r}
@@ -61,7 +69,18 @@ export function Hero() {
               ))}
             </motion.ul>
 
-            <motion.div {...enter(0.34)} className="mt-10 flex flex-wrap items-center gap-3">
+            <motion.dl {...enter(0.3)} className="mt-9 grid max-w-[560px] grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
+              {stats.map((st) => (
+                <div key={st.label} className="border-l border-line-strong pl-3.5">
+                  <dd className="text-[1.65rem] font-semibold leading-none tracking-[-0.03em] text-fg">
+                    <Counter value={st.value} />
+                  </dd>
+                  <dt className="mt-1.5 text-[12px] leading-snug text-mute">{st.label}</dt>
+                </div>
+              ))}
+            </motion.dl>
+
+            <motion.div {...enter(0.34)} className="mt-9 flex flex-wrap items-center gap-3">
               <a
                 href="#projects"
                 className="inline-flex items-center gap-2 rounded-full bg-signal px-6 py-3 text-[14.5px] font-medium text-white transition-colors hover:bg-[#3b7cf0]"
@@ -113,7 +132,7 @@ export function Hero() {
         </motion.div>
 
         <a
-          href="#about"
+          href="#journey"
           className="mx-auto mt-12 flex w-fit flex-col items-center gap-2 text-[12.5px] text-mute transition-colors hover:text-soft"
         >
           Scroll

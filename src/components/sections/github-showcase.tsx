@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, GitFork, RefreshCw, Star } from "lucide-react";
 import { githubUrl, siteConfig } from "@/config/site";
-import type { GitHubPayload, GitHubRepo } from "@/lib/github";
+import { isShowcased, showcaseRank, type GitHubPayload, type GitHubRepo } from "@/lib/github";
 import { GitHubIcon } from "../ui/brand-icons";
 import { Reveal } from "../ui/reveal";
 
@@ -67,7 +67,7 @@ async function load(): Promise<GitHubPayload> {
         url: user.html_url,
       },
       repos: repos
-        .filter((r) => !r.fork && !r.archived && String(r.name).toLowerCase() !== String(user.login).toLowerCase())
+        .filter((r) => !r.fork && !r.archived && isShowcased(String(r.name)))
         .map((r) => ({
           id: r.id as number,
           name: r.name as string,
@@ -80,7 +80,7 @@ async function load(): Promise<GitHubPayload> {
           updatedAt: r.pushed_at as string,
           topics: (r.topics as string[]) ?? [],
         }))
-        .sort((a, b) => b.stars - a.stars || +new Date(b.updatedAt) - +new Date(a.updatedAt)),
+        .sort((a, b) => showcaseRank(a.name) - showcaseRank(b.name)),
       fetchedAt: new Date().toISOString(),
     };
   } catch {

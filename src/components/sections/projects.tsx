@@ -1,18 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight, ExternalLink, Maximize2, X } from "lucide-react";
-import { projects, type Project } from "@/data/portfolio";
+import { projects, type Project, type ProjectCategory } from "@/data/portfolio";
 import { Section, SectionHeading } from "../ui/section";
 import { Reveal } from "../ui/reveal";
+import { Counter } from "../ui/counter";
+import { VizFrame } from "../ui/viz-frame";
 import { GitHubIcon } from "../ui/brand-icons";
 import { ProjectVisualArt } from "./project-visuals";
 import { GitHubShowcase } from "./github-showcase";
 
-function ProjectLinks({ p, size = "sm" }: { p: Project; size?: "sm" | "md" }) {
+const filters: ("All" | ProjectCategory)[] = ["All", "Machine learning", "Analytics", "BI dashboards"];
+
+function ProjectLinks({ p }: { p: Project }) {
   if (!p.repoUrl && !p.demoUrl) return null;
-  const pad = size === "md" ? "px-5 py-2.5 text-[14px]" : "px-4 py-2 text-[13px]";
   return (
     <div className="flex flex-wrap gap-2">
       {p.repoUrl && (
@@ -21,10 +25,10 @@ function ProjectLinks({ p, size = "sm" }: { p: Project; size?: "sm" | "md" }) {
           target="_blank"
           rel="noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className={`inline-flex items-center gap-2 rounded-full border border-line-strong font-medium text-fg transition-colors hover:border-soft hover:bg-panel-2 ${pad}`}
+          className="inline-flex items-center gap-2 rounded-full border border-line-strong px-4 py-2 text-[13.5px] font-medium text-fg transition-colors hover:border-soft hover:bg-panel-2"
         >
           <GitHubIcon className="size-4" />
-          Repository
+          Code
         </a>
       )}
       {p.demoUrl && (
@@ -33,7 +37,7 @@ function ProjectLinks({ p, size = "sm" }: { p: Project; size?: "sm" | "md" }) {
           target="_blank"
           rel="noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className={`inline-flex items-center gap-2 rounded-full bg-signal font-medium text-white transition-colors hover:bg-[#3b7cf0] ${pad}`}
+          className="inline-flex items-center gap-2 rounded-full bg-signal px-4 py-2 text-[13.5px] font-medium text-white transition-colors hover:bg-[#3b7cf0]"
         >
           <ExternalLink className="size-4" aria-hidden="true" />
           Live demo
@@ -43,17 +47,106 @@ function ProjectLinks({ p, size = "sm" }: { p: Project; size?: "sm" | "md" }) {
   );
 }
 
-function TechList({ tech }: { tech: string[] }) {
+function Chips({ tech, max }: { tech: string[]; max?: number }) {
+  const list = max ? tech.slice(0, max) : tech;
   return (
     <ul className="flex flex-wrap gap-1.5" aria-label="Technologies">
-      {tech.map((t) => (
-        <li key={t} className="rounded-md bg-ink/70 px-2.5 py-1 text-[12.5px] text-soft">
+      {list.map((t) => (
+        <li key={t} className="rounded-md bg-ink/70 px-2.5 py-1 text-[12px] text-soft">
           {t}
         </li>
       ))}
+      {max && tech.length > max && <li className="px-1.5 py-1 text-[12px] text-mute">+{tech.length - max}</li>}
     </ul>
   );
 }
+
+/* ---------- Interactive: how the pipeline picks a method by gap length ---------- */
+
+const tiers = [
+  { name: "Micro gap", method: "Linear interpolation", hue: "#4ade80", from: 0, to: 25 },
+  { name: "Short gap", method: "LightGBM + RandomForest ensemble", hue: "#4d8dff", from: 25, to: 70 },
+  { name: "Long gap", method: "Neighbour stations (inverse-distance)", hue: "#9d8cff", from: 70, to: 100 },
+];
+
+function GapSimulator() {
+  const [v, setV] = useState(45);
+  const tier = tiers.find((t) => v >= t.from && v <= t.to) ?? tiers[0];
+  // gap drawn proportionally inside a trace
+  const g0 = 380 - v * 2.2;
+  const g1 = 420 + v * 2.2;
+  const N = 120;
+  const yv = (i: number) => 60 - 22 * Math.sin(i / 9) - 8 * Math.sin(i / 2.7);
+  const xv = (i: number) => (i / (N - 1)) * 800;
+  const seg = (f: (x: number) => boolean) =>
+    Array.from({ length: N }, (_, i) => i)
+      .filter((i) => f(xv(i)))
+      .map((i, k) => `${k ? "L" : "M"}${xv(i).toFixed(1)},${yv(i).toFixed(1)}`)
+      .join("");
+
+  return (
+    <div className="flex h-full flex-col justify-center gap-6">
+      <svg viewBox="0 0 800 120" className="h-auto w-full" role="img" aria-label={`${tier.name}: filled with ${tier.method}`}>
+        <rect x={g0} y={4} width={g1 - g0} height={112} rx={8} fill={tier.hue} opacity={0.12} />
+        <path d={seg((x) => x <= g0)} stroke="var(--color-soft)" strokeWidth={2} fill="none" />
+        <path d={seg((x) => x >= g1)} stroke="var(--color-soft)" strokeWidth={2} fill="none" />
+        <path
+          d={seg((x) => x >= g0 && x <= g1)}
+          stroke={tier.hue}
+          strokeWidth={3}
+          strokeDasharray="7 5"
+          fill="none"
+          className="viz-flow"
+          style={{ transition: "stroke .3s" }}
+        />
+      </svg>
+
+      <div>
+        <label htmlFor="gap-len" className="flex items-center justify-between text-[12.5px] text-mute">
+          <span>Drag: how long was the sensor offline?</span>
+        </label>
+        <input
+          id="gap-len"
+          type="range"
+          min={2}
+          max={100}
+          value={v}
+          onChange={(e) => setV(+e.target.value)}
+          className="mt-3 w-full cursor-pointer accent-[var(--color-signal)]"
+          aria-valuetext={tier.name}
+        />
+        <div className="mt-1 flex justify-between text-[11.5px] text-mute">
+          <span>minutes</span>
+          <span>hours</span>
+          <span>days</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        {tiers.map((t) => {
+          const on = t === tier;
+          return (
+            <button
+              key={t.name}
+              type="button"
+              onClick={() => setV(Math.round((t.from + t.to) / 2))}
+              className={`rounded-xl border p-3 text-left transition-all ${on ? "bg-panel-2" : "border-line opacity-55 hover:opacity-90"}`}
+              style={on ? { borderColor: t.hue } : undefined}
+            >
+              <span className="flex items-center gap-1.5 text-[12.5px] font-medium text-fg">
+                <span className="size-2 rounded-full" style={{ background: t.hue }} aria-hidden="true" />
+                {t.name}
+              </span>
+              <span className="mt-1 block text-[11.5px] leading-snug text-soft">{t.method}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Detail dialog ---------- */
 
 function ProjectDialog({ p, onClose }: { p: Project; onClose: () => void }) {
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -82,12 +175,21 @@ function ProjectDialog({ p, onClose }: { p: Project; onClose: () => void }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={`dlg-${p.id}`}
-        layoutId={`card-${p.id}`}
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 30, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 260, damping: 28 }}
         onClick={(e) => e.stopPropagation()}
         className="relative max-h-[92dvh] w-full max-w-3xl overflow-y-auto rounded-t-3xl border border-line bg-panel md:rounded-3xl"
       >
-        <div className="relative aspect-[16/7] border-b border-line bg-deep p-6">
-          <ProjectVisualArt kind={p.visual} />
+        <div className="relative border-b border-line bg-deep p-6 md:p-8">
+          {p.id === "telemetry" ? (
+            <GapSimulator />
+          ) : (
+            <VizFrame className="aspect-[16/8]">
+              <ProjectVisualArt kind={p.visual} />
+            </VizFrame>
+          )}
           <button
             ref={closeRef}
             type="button"
@@ -99,40 +201,61 @@ function ProjectDialog({ p, onClose }: { p: Project; onClose: () => void }) {
           </button>
         </div>
         <div className="p-6 md:p-9">
-          {p.context && <p className="text-[13px] text-mute">{p.context}</p>}
-          <h3 id={`dlg-${p.id}`} className="mt-1 text-2xl font-semibold tracking-[-0.025em] text-fg md:text-3xl">
+          <div className="flex flex-wrap items-center gap-2 text-[12.5px] text-mute">
+            <span className="rounded-full border border-line px-2.5 py-0.5">{p.category}</span>
+            {p.context && <span>{p.context}</span>}
+          </div>
+          <h3 id={`dlg-${p.id}`} className="mt-3 text-2xl font-semibold tracking-[-0.025em] text-fg md:text-3xl">
             {p.title}
           </h3>
-          <p className="mt-4 max-w-[62ch] text-[1.0625rem] leading-relaxed text-soft">{p.summary}</p>
+          <p className="mt-2 text-[16px] text-soft">{p.tagline}</p>
 
-          {p.metrics && (
-            <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-4">
-              {p.metrics.map((m) => (
-                <div key={m.label} className="bg-panel p-4">
-                  <dt className="text-[12.5px] text-mute">{m.label}</dt>
-                  <dd className="tabular mt-1 font-mono text-xl text-fg">{m.value}</dd>
+          {(p.headline || p.metrics) && (
+            <dl className="mt-7 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-4">
+              {p.headline && (
+                <div className="bg-panel p-4">
+                  <dd className="font-mono text-2xl text-signal">
+                    <Counter value={p.headline.value} />
+                  </dd>
+                  <dt className="mt-1 text-[12px] text-mute">{p.headline.label}</dt>
                 </div>
-              ))}
+              )}
+              {p.metrics
+                ?.filter((m) => !p.headline || m.value !== p.headline.value)
+                .slice(0, p.headline ? 3 : 4)
+                .map((m) => (
+                  <div key={m.label} className="bg-panel p-4">
+                    <dd className="font-mono text-2xl text-fg">
+                      <Counter value={m.value} />
+                    </dd>
+                    <dt className="mt-1 text-[12px] text-mute">{m.label}</dt>
+                  </div>
+                ))}
             </dl>
           )}
 
-          <h4 className="mt-9 text-[15px] font-semibold text-fg">What it does</h4>
-          <ul className="mt-3 space-y-3">
+          <ul className="mt-7 space-y-2.5">
             {p.highlights.map((h) => (
               <li key={h} className="flex gap-3 text-[15px] leading-relaxed text-soft">
-                <span className="mt-[0.62em] size-1.5 shrink-0 rounded-full bg-signal" aria-hidden="true" />
+                <span className="mt-[0.6em] size-1.5 shrink-0 rounded-full bg-signal" aria-hidden="true" />
                 {h}
               </li>
             ))}
           </ul>
 
-          <h4 className="mt-9 text-[15px] font-semibold text-fg">Built with</h4>
-          <div className="mt-3">
-            <TechList tech={p.tech} />
-          </div>
+          {p.screenshots && p.screenshots.length > 0 && (
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              {p.screenshots.map((s) => (
+                <a key={s.src} href={s.src} target="_blank" rel="noreferrer" className="relative block aspect-video overflow-hidden rounded-xl border border-line">
+                  <Image src={s.src} alt={s.alt} fill sizes="(min-width: 768px) 360px, 90vw" className="object-cover transition-transform duration-500 hover:scale-105" />
+                </a>
+              ))}
+            </div>
+          )}
 
-          <div className="mt-9">
-            <ProjectLinks p={p} size="md" />
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
+            <Chips tech={p.tech} />
+            <ProjectLinks p={p} />
           </div>
         </div>
       </motion.div>
@@ -140,36 +263,43 @@ function ProjectDialog({ p, onClose }: { p: Project; onClose: () => void }) {
   );
 }
 
+/* ---------- Cards ---------- */
+
 function FeaturedCard({ p, onOpen }: { p: Project; onOpen: () => void }) {
   return (
     <Reveal>
-      <motion.article
-        layoutId={`card-${p.id}`}
-        className="group grid overflow-hidden rounded-[28px] border border-line bg-panel/70 transition-colors duration-300 hover:border-line-strong lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
+      <article
+        id={`project-${p.id}`}
+        className="grid overflow-hidden rounded-[28px] border border-line bg-panel/70 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]"
       >
-        <div className="relative order-last flex min-h-[240px] items-center border-t border-line bg-deep p-6 lg:order-none lg:border-r lg:border-t-0 lg:p-10">
-          <div className="w-full transition-transform duration-500 group-hover:scale-[1.02]">
-            <ProjectVisualArt kind={p.visual} />
+        <div className="relative border-b border-line bg-deep p-6 md:p-9 lg:border-b-0 lg:border-r">
+          <span className="absolute left-6 top-5 rounded-full bg-[#4ade80]/10 px-2.5 py-0.5 text-[11.5px] text-[#4ade80] md:left-9">
+            ● Live in production
+          </span>
+          <div className="pt-8">
+            <GapSimulator />
           </div>
         </div>
-        <div className="flex flex-col p-7 md:p-10">
+        <div className="flex flex-col p-7 md:p-9">
           {p.context && <p className="text-[13px] text-mute">{p.context}</p>}
           <h3 className="mt-1.5 text-2xl font-semibold leading-tight tracking-[-0.025em] text-fg md:text-[2rem]">{p.title}</h3>
-          <p className="mt-4 text-[15.5px] leading-relaxed text-soft">{p.summary}</p>
+          <p className="mt-3 text-[15.5px] text-soft">{p.tagline}</p>
 
-          {p.metrics && (
-            <dl className="mt-7 grid grid-cols-3 gap-4 border-y border-line py-5">
-              {p.metrics.slice(0, 3).map((m) => (
-                <div key={m.label}>
-                  <dd className="tabular font-mono text-[1.35rem] text-fg">{m.value}</dd>
-                  <dt className="mt-1 text-[12px] leading-snug text-mute">{m.label}</dt>
+          <dl className="mt-7 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line">
+            {[...(p.headline ? [p.headline] : []), ...(p.metrics ?? []).filter((m) => m.value !== p.headline?.value)]
+              .slice(0, 4)
+              .map((m, i) => (
+                <div key={m.label} className="bg-panel p-4">
+                  <dd className={`text-[1.75rem] font-semibold leading-none tracking-[-0.03em] ${i === 0 ? "text-signal" : "text-fg"}`}>
+                    <Counter value={m.value} />
+                  </dd>
+                  <dt className="mt-2 text-[12px] text-mute">{m.label}</dt>
                 </div>
               ))}
-            </dl>
-          )}
+          </dl>
 
           <div className="mt-6">
-            <TechList tech={p.tech} />
+            <Chips tech={p.tech} />
           </div>
 
           <div className="mt-auto flex flex-wrap items-center gap-3 pt-8">
@@ -179,74 +309,109 @@ function FeaturedCard({ p, onOpen }: { p: Project; onOpen: () => void }) {
               className="inline-flex items-center gap-2 rounded-full bg-fg px-5 py-2.5 text-[14px] font-medium text-ink transition-colors hover:bg-white"
             >
               <Maximize2 className="size-4" aria-hidden="true" />
-              Read the case study
+              How it works
             </button>
-            <ProjectLinks p={p} size="md" />
+            <ProjectLinks p={p} />
           </div>
         </div>
-      </motion.article>
+      </article>
     </Reveal>
   );
 }
 
-function ProjectCard({ p, onOpen, i }: { p: Project; onOpen: () => void; i: number }) {
+function ProjectCard({ p, onOpen }: { p: Project; onOpen: () => void }) {
+  const reduce = useReducedMotion();
   return (
-    <Reveal delay={i * 0.06} className="h-full">
-      <motion.article
-        layoutId={`card-${p.id}`}
-        whileHover={{ y: -4 }}
-        transition={{ type: "spring", stiffness: 300, damping: 26 }}
-        className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-panel/70 transition-colors duration-300 hover:border-line-strong"
-      >
-        <div className="aspect-[16/9] border-b border-line bg-deep p-5">
+    <motion.article
+      id={`project-${p.id}`}
+      layout={!reduce}
+      initial={reduce ? false : { opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={reduce ? undefined : { opacity: 0, scale: 0.96 }}
+      whileHover={reduce ? undefined : { y: -6 }}
+      transition={{ type: "spring", stiffness: 300, damping: 28 }}
+      className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-panel/70 transition-colors duration-300 hover:border-signal/40"
+    >
+      <div className="relative aspect-[16/10] overflow-hidden border-b border-line bg-deep">
+        <VizFrame className="absolute inset-0 p-5 transition-transform duration-700 group-hover:scale-[1.06]">
           <ProjectVisualArt kind={p.visual} />
-        </div>
-        <div className="flex flex-1 flex-col p-6">
-          <h3 className="text-[1.2rem] font-semibold leading-snug tracking-[-0.02em] text-fg">
-            <button type="button" onClick={onOpen} className="text-left after:absolute after:inset-0 after:content-['']">
-              {p.title}
-            </button>
-          </h3>
-          <p className="mt-3 text-[14.5px] leading-relaxed text-soft">{p.summary}</p>
-          <div className="mt-5">
-            <TechList tech={p.tech} />
-          </div>
-          <div className="relative z-10 mt-auto flex items-center justify-between gap-3 pt-6">
-            <ProjectLinks p={p} />
-            <span className="ml-auto inline-flex items-center gap-1 text-[13px] text-mute transition-colors group-hover:text-fg">
-              Details
-              <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
+        </VizFrame>
+        {p.headline && (
+          <div className="absolute bottom-3 left-3 rounded-xl border border-line bg-ink/85 px-3 py-2 backdrop-blur">
+            <span className="block text-[1.35rem] font-semibold leading-none tracking-[-0.03em] text-fg">
+              <Counter value={p.headline.value} />
             </span>
+            <span className="mt-1 block text-[11px] uppercase tracking-[0.08em] text-mute">{p.headline.label}</span>
           </div>
+        )}
+        <span className="absolute right-3 top-3 rounded-full bg-ink/80 px-2.5 py-0.5 text-[11px] text-soft backdrop-blur">{p.category}</span>
+      </div>
+      <div className="flex flex-1 flex-col p-5">
+        <h3 className="text-[1.1rem] font-semibold leading-snug tracking-[-0.02em] text-fg">
+          <button type="button" onClick={onOpen} className="text-left after:absolute after:inset-0 after:content-['']">
+            {p.title}
+          </button>
+        </h3>
+        <p className="mt-1.5 text-[14px] leading-snug text-soft">{p.tagline}</p>
+        <div className="mt-auto flex items-end justify-between gap-3 pt-5">
+          <Chips tech={p.tech} max={3} />
+          <ArrowUpRight
+            className="size-5 shrink-0 text-mute transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-signal"
+            aria-hidden="true"
+          />
         </div>
-      </motion.article>
-    </Reveal>
+      </div>
+    </motion.article>
   );
 }
 
 export function Projects() {
   const [openId, setOpenId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<(typeof filters)[number]>("All");
   const featured = projects.find((p) => p.featured);
-  const rest = projects.filter((p) => !p.featured);
+  const rest = useMemo(
+    () => projects.filter((p) => !p.featured && (filter === "All" || p.category === filter)),
+    [filter],
+  );
   const open = projects.find((p) => p.id === openId);
   const close = useCallback(() => setOpenId(null), []);
 
   return (
     <Section id="projects">
-      <SectionHeading
-        id="projects"
-        index="04"
-        title="Selected work"
-        lede="One system running in production, and the analytics projects I'm building alongside my degree."
-      />
+      <SectionHeading id="projects" index="03" title="Projects" lede="Numbers first. Drag, hover, click — everything here moves." />
 
       {featured && <FeaturedCard p={featured} onOpen={() => setOpenId(featured.id)} />}
 
-      <div className="mt-5 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {rest.map((p, i) => (
-          <ProjectCard key={p.id} p={p} i={i} onOpen={() => setOpenId(p.id)} />
-        ))}
+      <div className="mt-14 flex flex-wrap gap-2" role="tablist" aria-label="Filter projects">
+        {filters.map((f) => {
+          const n = f === "All" ? projects.length - 1 : projects.filter((p) => !p.featured && p.category === f).length;
+          const on = f === filter;
+          return (
+            <button
+              key={f}
+              type="button"
+              role="tab"
+              aria-selected={on}
+              onClick={() => setFilter(f)}
+              className={`rounded-full border px-4 py-2 text-[13.5px] transition-colors ${
+                on ? "border-fg bg-fg text-ink" : "border-line text-soft hover:border-line-strong hover:text-fg"
+              }`}
+            >
+              {f} <span className={`tabular ml-1 ${on ? "text-ink/60" : "text-mute"}`}>{n}</span>
+            </button>
+          );
+        })}
       </div>
+
+      <motion.div layout className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <AnimatePresence mode="popLayout">
+          {rest.map((p) => (
+            <ProjectCard key={p.id} p={p} onOpen={() => setOpenId(p.id)} />
+          ))}
+        </AnimatePresence>
+      </motion.div>
+
+      <p className="mt-5 text-[12px] text-mute">Card art is illustrative — it shows the kind of analysis, not the actual results.</p>
 
       <AnimatePresence>{open && <ProjectDialog p={open} onClose={close} />}</AnimatePresence>
 

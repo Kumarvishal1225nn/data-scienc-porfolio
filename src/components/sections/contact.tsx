@@ -32,16 +32,13 @@ export function Contact() {
       <div className="container-page relative">
         <Reveal className="max-w-3xl">
           <p className="flex items-baseline gap-4 text-sm text-mute">
-            <span className="tabular">07</span>
+            <span className="tabular">05</span>
             Contact
           </p>
           <h2 id="contact-title" className="mt-6 text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.04em] text-fg md:text-[4.25rem]">
             Hiring for data, analytics or ML? Let&apos;s talk.
           </h2>
-          <p className="mt-6 max-w-[56ch] text-[1.0625rem] leading-relaxed text-soft">
-            I&apos;m looking for Data Analyst, Business Analyst and Machine Learning roles, and I&apos;m open
-            to collaborations and research too. Email is the fastest way to reach me.
-          </p>
+          <p className="mt-6 text-[1.0625rem] text-soft">Data Analyst · Business Analyst · ML roles. Email is fastest.</p>
         </Reveal>
 
         <Reveal delay={0.1} className="mt-12 flex flex-wrap items-center gap-3">
