@@ -54,9 +54,8 @@ export const githubUrl = `https://github.com/${siteConfig.githubUsername}`;
 
 export const navItems = [
   { id: "home", label: "Home" },
+  { id: "doors", label: "Projects" },
   { id: "journey", label: "Journey" },
   { id: "skills", label: "Skills" },
-  { id: "projects", label: "Projects" },
-  { id: "experience", label: "Experience" },
   { id: "contact", label: "Contact" },
 ] as const;

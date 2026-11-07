@@ -86,31 +86,37 @@ export const skillGroups = [
     name: "Programming",
     note: "Writing analysis and pipelines",
     icon: "code",
-    skills: ["Python", "SQL"],
+    skills: ["Python", "SQL", "R"],
   },
   {
     name: "Data analytics",
     note: "Cleaning, exploring, reporting",
     icon: "table",
-    skills: ["Excel", "Pandas", "NumPy", "Power BI", "Tableau", "Exploratory data analysis", "Data visualization"],
+    skills: ["Advanced Excel", "Power BI", "DAX", "Tableau", "Pandas", "NumPy", "Data modeling", "Exploratory data analysis", "Data visualization"],
   },
   {
     name: "Machine learning",
     note: "Modelling and evaluation",
     icon: "brain",
-    skills: ["Scikit-learn", "LightGBM", "XGBoost", "NLP", "Time series analysis"],
+    skills: ["Statistics", "Scikit-learn", "LightGBM", "XGBoost", "Random Forest", "Anomaly detection", "NLP", "Time series analysis"],
   },
   {
     name: "Databases & cloud",
     note: "Storing and serving data",
     icon: "database",
-    skills: ["PostgreSQL", "AWS", "Neo4j"],
+    skills: ["AWS", "Docker", "PostgreSQL", "Neo4j"],
   },
   {
     name: "Tools",
     note: "Day-to-day workflow",
     icon: "wrench",
     skills: ["Jupyter Notebook", "Git", "GitHub"],
+  },
+  {
+    name: "Business",
+    note: "Turning analysis into decisions",
+    icon: "briefcase",
+    skills: ["Requirements analysis", "Root-cause analysis", "Data storytelling", "Stakeholder management", "Ownership"],
   },
 ] as const;
 
@@ -124,7 +130,8 @@ export type ProjectVisual =
   | "tourism"
   | "walmart"
   | "aqi"
-  | "risk";
+  | "risk"
+  | "sentiment";
 
 export type ProjectCategory = "Machine learning" | "Analytics" | "BI dashboards";
 
@@ -159,12 +166,12 @@ export const projects: Project[] = [
     tagline: "Fills sensor outages across 143 weather stations with ML.",
     visual: "telemetry",
     category: "Machine learning",
-    tech: ["Python", "LightGBM", "XGBoost", "AWS", "DynamoDB"],
+    tech: ["Python", "LightGBM", "XGBoost", "AWS", "Docker", "DynamoDB"],
     headline: { value: "143", label: "IoT sensors" },
     highlights: [
       "Every station resampled to 5-minute intervals",
       "Gap length picks the method: interpolation → ML ensemble → neighbour stations",
-      "Runs on AWS Fargate + EventBridge, writes back to DynamoDB",
+      "Docker on AWS Fargate + EventBridge, Terraform; idempotent DynamoDB write-back",
     ],
     metrics: [
       { label: "R²", value: "0.9911" },
@@ -175,13 +182,13 @@ export const projects: Project[] = [
   },
   {
     id: "tourism",
-    title: "Himachal tourist vehicle flows",
+    title: "Tourism demand forecasting",
     context: "Dissertation",
     tagline: "Seasonal tourist traffic: clusters, anomalies and forecasts.",
     visual: "tourism",
     category: "Machine learning",
     tech: ["Python", "K-Means", "Isolation Forest", "ARIMA"],
-    headline: { value: "100,000", label: "rows analysed" },
+    headline: { value: "100,000", label: "vehicle records" },
     highlights: [
       "Dataset calibrated to real HP tourism statistics",
       "K-Means segments, Isolation Forest anomalies, ARIMA forecast",
@@ -195,14 +202,15 @@ export const projects: Project[] = [
   {
     id: "walmart",
     title: "Walmart sales analytics",
-    tagline: "SQL deep-dive into what sells, where and when.",
+    tagline: "Sales KPIs by branch, product line and month — in SQL.",
     visual: "walmart",
     category: "Analytics",
-    tech: ["SQL", "Excel"],
+    tech: ["SQL", "Business analytics"],
     headline: { value: "10K+", label: "transactions" },
     highlights: [
-      "Sales by branch, product line and time of day",
-      "Revenue and customer-type breakdowns in SQL",
+      "Joins, aggregations and GROUP BY across 10,000+ transactions",
+      "Found seasonal peaks and under-performing categories",
+      "KPI-based recommendations on branch focus and product mix",
     ],
   },
   {
@@ -214,28 +222,40 @@ export const projects: Project[] = [
     category: "Machine learning",
     tech: ["Python", "Time series", "CPCB data", "OpenAQ"],
     highlights: [
-      "Monitoring, gap-filling and forecasting in one dashboard",
-      "Data from CPCB / data.gov.in and OpenAQ",
+      "Integrated CPCB and OpenAQ data for Indian cities",
+      "Gap-filled missing readings, then forecast",
+      "Interactive dashboard on top",
     ],
   },
   {
     id: "risk",
-    title: "Portfolio analytics & risk dashboard",
-    tagline: "Returns, Sharpe ratio and drawdowns at a glance.",
+    title: "Portfolio analytics & risk",
+    tagline: "Returns, volatility, Sharpe and drawdown in one Power BI view.",
     visual: "risk",
     category: "BI dashboards",
-    tech: ["Python", "SQL", "Power BI"],
-    highlights: ["Sharpe ratio and maximum drawdown tracking", "Interactive Power BI views"],
+    tech: ["Python", "SQL", "Power BI", "DAX"],
+    highlights: ["Data model + DAX measures in Power BI", "Tracks returns, volatility, Sharpe ratio and drawdown", "Analysis done in Python and SQL"],
+  },
+  {
+    id: "sentiment",
+    title: "Text sentiment analysis",
+    context: "C-DAC Patna",
+    tagline: "Reads text and labels it positive or negative.",
+    visual: "sentiment",
+    category: "Machine learning",
+    tech: ["Python", "NLP", "TF-IDF", "Linear SVM"],
+    highlights: ["NLP preprocessing → TF-IDF features", "Linear SVM classifier, tested on unseen text"],
+    repoUrl: "https://github.com/Kumarvishal1225nn/Text-Sentiment-Analysis",
   },
   {
     id: "taxi",
-    title: "NYC taxi network analytics",
-    tagline: "How trips flow between city zones.",
+    title: "NYC taxi analytics",
+    tagline: "Finding the city's high-traffic hubs and corridors.",
     visual: "taxi",
     category: "Analytics",
-    tech: ["Tableau", "SQL", "Graph analytics"],
-    // headline: { value: "?", label: "trips" },  ← add the real number
-    highlights: ["Zones as nodes, trips as weighted edges", "Demand by geography and hour"],
+    tech: ["Tableau", "Neo4j", "Graph analytics"],
+    headline: { value: "263", label: "city zones" },
+    highlights: ["Trips analysed across all 263 NYC taxi zones", "Neo4j graph: zones as nodes, trips as edges", "Tableau visuals of hubs and corridors"],
   },
   {
     id: "retail",
@@ -283,8 +303,10 @@ export const experience: ExperienceItem[] = [
     kind: "Internship",
     period: "May 2026 – Jul 2026",
     points: [
-      "Shipped an ML gap-filling pipeline for 143 IoT stations to production",
-      "Notebook → AWS (Terraform, Docker, Fargate)",
+      "Shipped a production pipeline filling telemetry gaps for ~143 IoT stations",
+      "3-tier engine: interpolation → LightGBM + RF ensemble → inverse-distance weighting",
+      "AWS: Docker on Fargate, EventBridge, Terraform — cut cost by replacing a Step Functions fan-out",
+      "Idempotent DynamoDB write-back, anomaly checks, 26-page design doc",
     ],
   },
   {
@@ -296,10 +318,11 @@ export const experience: ExperienceItem[] = [
   },
   {
     id: "cdac",
-    role: "AI & Data Science Programme",
+    role: "AI & Data Science Trainee",
     org: "C-DAC Patna",
     kind: "Training",
     period: "Dec 2025 – Jan 2026",
+    points: ["Certified training: Python, Pandas, NumPy, EDA, ML", "Built an NLP text sentiment classifier"],
   },
   {
     id: "bserc",
@@ -313,6 +336,7 @@ export const experience: ExperienceItem[] = [
     org: "A.R. Hotel & Restaurant",
     kind: "Work",
     period: "Jul 2022 – Dec 2024 · 29 months",
+    points: ["Ran kitchen, service and front-desk operations", "Forecast stock demand to cut wastage and stock-outs", "Root-cause analysis of guest complaints → new workflows"],
   },
 ];
 
@@ -334,5 +358,22 @@ export const education = [
     period: "2018 – 2022",
     current: false,
     note: "Undergraduate degree in computer science and engineering.",
+  },
+];
+
+/* ---------- Certifications & responsibilities ---------- */
+
+export const certifications: { name: string; issuer?: string }[] = [
+  { name: "SQL for Data Analytics", issuer: "Internshala" },
+  { name: "Power BI Data Modeling with DAX" },
+  { name: "Excel Analytics" },
+  { name: "McKinsey Forward Program", issuer: "McKinsey & Company" },
+];
+
+export const responsibilities = [
+  {
+    role: "Mess Committee Coordinator",
+    org: "IIT Ropar",
+    point: "Turned recurring student complaints into menu and service changes.",
   },
 ];

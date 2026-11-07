@@ -116,7 +116,7 @@ export function Navbar() {
           <a
             href={siteConfig.resumePath}
             download
-            className="ml-2 inline-flex items-center gap-2 rounded-full bg-fg px-4 py-2 text-[13px] font-medium text-ink transition-colors hover:bg-white"
+            className="ml-2 inline-flex items-center gap-2 rounded-full bg-fg px-4 py-2 text-[13px] font-medium text-ink transition-opacity hover:opacity-85"
           >
             <Download className="size-3.5" aria-hidden="true" />
             Resume

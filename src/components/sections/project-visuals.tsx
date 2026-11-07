@@ -347,6 +347,43 @@ function Risk({ still }: Props) {
   );
 }
 
+
+/* Words flowing into a classifier, sorted into positive / negative. */
+function Sentiment({ still }: Props) {
+  const words: [string, number, boolean][] = [
+    ["great", 40, true],
+    ["slow", 70, false],
+    ["love", 100, true],
+    ["broken", 130, false],
+    ["fast", 160, true],
+    ["meh", 190, false],
+  ];
+  return (
+    <svg viewBox="0 0 400 220" className="h-full w-full" aria-hidden="true">
+      {words.map(([w, y, pos], i) => (
+        <g key={w}>
+          <path d={`M110,${y} C150,${y} 150,110 180,110`} stroke={L} strokeWidth={1.2} fill="none" strokeDasharray={still ? undefined : "4 4"} className={still ? "" : "viz-flow"} />
+          <rect x={30} y={y - 11} width={74} height={22} rx={11} fill={P} stroke={pos ? A : "#f87171"} strokeOpacity={0.7} />
+          <text x={67} y={y + 4} textAnchor="middle" fill="var(--color-fg)" fontSize={11} fontFamily="var(--font-mono)">{w}</text>
+          {!still && (
+            <circle r={3} fill={pos ? A : "#f87171"}>
+              <animateMotion dur="2.4s" begin={`${i * 0.4}s`} repeatCount="indefinite" path={`M110,${y} C150,${y} 150,110 180,110 L220,110 C250,110 250,${pos ? 60 : 160} 300,${pos ? 60 : 160}`} />
+            </circle>
+          )}
+        </g>
+      ))}
+      <rect x={180} y={86} width={40} height={48} rx={10} fill={V} opacity={0.9} />
+      <text x={200} y={114} textAnchor="middle" fill="var(--color-ink)" fontSize={11} fontWeight={600}>SVM</text>
+      <path d="M220,110 C250,110 250,60 300,60" stroke={A} strokeWidth={1.6} fill="none" />
+      <path d="M220,110 C250,110 250,160 300,160" stroke="#f87171" strokeWidth={1.6} fill="none" />
+      <rect x={300} y={42} width={78} height={36} rx={10} fill="var(--color-signal-soft)" stroke={A} />
+      <text x={339} y={64} textAnchor="middle" fill={A} fontSize={12}>positive</text>
+      <rect x={300} y={142} width={78} height={36} rx={10} fill="#f8717118" stroke="#f87171" />
+      <text x={339} y={164} textAnchor="middle" fill="#fca5a5" fontSize={12}>negative</text>
+    </svg>
+  );
+}
+
 export function ProjectVisualArt({ kind, still = false }: { kind: ProjectVisual; still?: boolean }) {
   switch (kind) {
     case "telemetry":
@@ -365,5 +402,7 @@ export function ProjectVisualArt({ kind, still = false }: { kind: ProjectVisual;
       return <Aqi still={still} />;
     case "risk":
       return <Risk still={still} />;
+    case "sentiment":
+      return <Sentiment still={still} />;
   }
 }

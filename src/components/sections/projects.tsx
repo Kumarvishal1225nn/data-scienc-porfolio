@@ -69,7 +69,7 @@ const tiers = [
   { name: "Long gap", method: "Neighbour stations (inverse-distance)", hue: "#9d8cff", from: 70, to: 100 },
 ];
 
-function GapSimulator() {
+export function GapSimulator() {
   const [v, setV] = useState(45);
   const tier = tiers.find((t) => v >= t.from && v <= t.to) ?? tiers[0];
   // gap drawn proportionally inside a trace
