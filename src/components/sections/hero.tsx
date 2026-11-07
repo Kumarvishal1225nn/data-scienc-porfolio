@@ -7,8 +7,10 @@ import { ArrowDown, Download } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { SignalTrace } from "./signal-trace";
 import { Counter } from "../ui/counter";
+import { FlipTag } from "../ui/flip-tag";
+import { PullCord } from "../ui/pull-cord";
 
-const roles = ["Data Analyst", "Business Analyst", "ML Engineer"];
+const roles = ["Data Analyst", "Business Analyst", "ML Engineer", "Data Engineer"];
 
 /* Verified numbers only — each comes from a project on this page. */
 const stats = [
@@ -46,33 +48,29 @@ export function Hero() {
         aria-hidden="true"
       />
 
+      <PullCord />
       <div className="container-page relative">
         <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-16">
           <motion.div style={{ y: textY, opacity: fade }}>
-            <motion.p {...enter(0)} className="text-[15px] text-soft">
-              Hello, I&apos;m Vishal.
+            <motion.p {...enter(0)} className="flex items-center gap-2 text-[13px] uppercase tracking-[0.16em] text-mute">
+              <span className="size-1.5 animate-blink rounded-full bg-[#4ade80]" aria-hidden="true" />
+              Open to full-time roles · 2027
             </motion.p>
 
             <motion.h1
               {...enter(0.08)}
-              className="mt-5 text-[3.1rem] font-semibold leading-[0.98] tracking-[-0.045em] text-fg sm:text-[4.2rem] lg:text-[5.4rem]"
+              className="mt-6 text-[3rem] font-semibold leading-[1.02] tracking-[-0.045em] text-fg sm:text-[4rem] lg:text-[4.9rem]"
             >
-              Turning data
-              <br />
-              into decisions.
+              Hi, I&apos;m Vishal.
+              <span className="block text-mute">I am a</span>
+              <span className="mt-4 block text-[2.1rem] tracking-[-0.03em] sm:text-[2.6rem] lg:text-[3rem]">
+                <FlipTag words={roles} />
+              </span>
             </motion.h1>
 
             <motion.p {...enter(0.18)} className="mt-6 text-[1.05rem] text-soft">
               MS Data Science &amp; Management · <span className="text-fg">IIT Ropar × IIM Amritsar</span>
             </motion.p>
-
-            <motion.ul {...enter(0.26)} className="mt-6 flex flex-wrap gap-2" aria-label="Roles">
-              {roles.map((r) => (
-                <li key={r} className="rounded-full border border-line-strong px-3.5 py-1.5 text-[13px] text-soft">
-                  {r}
-                </li>
-              ))}
-            </motion.ul>
 
             <motion.dl {...enter(0.3)} className="mt-9 grid max-w-[560px] grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
               {stats.map((st) => (
@@ -87,7 +85,7 @@ export function Hero() {
 
             <motion.div {...enter(0.34)} className="mt-9 flex flex-wrap items-center gap-3">
               <a
-                href="#projects"
+                href="#doors"
                 className="inline-flex items-center gap-2 rounded-full bg-signal px-6 py-3 text-[14.5px] font-medium text-white transition-colors hover:bg-[#3b7cf0]"
               >
                 Explore my work
@@ -117,13 +115,13 @@ export function Hero() {
                 sizes="(min-width: 1024px) 460px, 90vw"
                 className="object-cover object-[50%_20%]"
               />
-              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/80 to-transparent" aria-hidden="true" />
+              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 to-transparent" aria-hidden="true" />
               <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4">
                 <div>
                   <p className="text-[15px] font-medium text-white">Kumar Vishal</p>
                   <p className="text-[13px] text-white/70">MS DSM · IIT Ropar × IIM Amritsar</p>
                 </div>
-                <span className="flex items-center gap-1.5 rounded-full bg-ink/70 px-3 py-1 text-[12px] text-white/85 backdrop-blur">
+                <span className="flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1 text-[12px] text-white/90 backdrop-blur">
                   <span className="size-1.5 animate-blink rounded-full bg-[#4ade80]" aria-hidden="true" />
                   Open to roles
                 </span>

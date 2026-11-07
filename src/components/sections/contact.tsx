@@ -36,7 +36,8 @@ export function Contact() {
             Contact
           </p>
           <h2 id="contact-title" className="mt-6 text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.04em] text-fg md:text-[4.25rem]">
-            Hiring for data, analytics or ML? Let&apos;s talk.
+            Got a role?
+            <span className="block text-mute">Let&apos;s build it together.</span>
           </h2>
           <p className="mt-6 text-[1.0625rem] text-soft">Data Analyst · Business Analyst · ML roles. Email is fastest.</p>
         </Reveal>

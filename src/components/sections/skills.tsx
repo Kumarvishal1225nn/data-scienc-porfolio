@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { BrainCircuit, Code2, Database, Table2, Wrench, type LucideIcon } from "lucide-react";
+import { BrainCircuit, Briefcase, Code2, Database, Table2, Wrench, type LucideIcon } from "lucide-react";
 import { projects, skillGroups } from "@/data/portfolio";
 import { Section, SectionHeading } from "../ui/section";
 import { Reveal } from "../ui/reveal";
@@ -14,6 +14,7 @@ const icons: Record<string, LucideIcon> = {
   brain: BrainCircuit,
   database: Database,
   wrench: Wrench,
+  briefcase: Briefcase,
 };
 
 /* Map skill names to the words used in project tech lists. */
@@ -21,6 +22,11 @@ const aliases: Record<string, string[]> = {
   AWS: ["AWS", "DynamoDB"],
   "Time series analysis": ["Time series", "ARIMA"],
   "Data visualization": ["Tableau", "Power BI"],
+  "Advanced Excel": ["Excel"],
+  "Data modeling": ["DAX", "Power BI"],
+  "Random Forest": ["LightGBM"],
+  "Anomaly detection": ["Isolation Forest"],
+  Statistics: ["ARIMA", "K-Means"],
   "Exploratory data analysis": ["Python"],
   Pandas: ["Python"],
   NumPy: ["Python"],
@@ -46,7 +52,7 @@ export function Skills() {
 
   return (
     <Section id="skills" tone="deep">
-      <SectionHeading id="skills" index="02" title="Toolkit" lede="Pick a tool — see where I've used it." />
+      <SectionHeading id="skills" index="04" title="Toolkit" lede="Pick a tool — see where I've used it." />
 
       <Reveal>
         <div className="flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none]" role="tablist" aria-label="Skill groups">
@@ -130,7 +136,7 @@ export function Skills() {
                 {used.slice(0, 4).map((p) => (
                   <li key={p.id}>
                     <a
-                      href={`#project-${p.id}`}
+                      href="#doors"
                       className="group flex items-center gap-3 rounded-2xl border border-line bg-panel/70 p-3 transition-colors hover:border-line-strong"
                     >
                       <span className="block h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-deep p-1.5">

@@ -25,6 +25,31 @@
   }
 }
 
+/* Light theme — toggled by the hero's pull-cord (data-theme on <html>). */
+:root[data-theme="light"] {
+  --color-ink: #f3efe7;
+  --color-deep: #ebe6dc;
+  --color-panel: #fbf9f5;
+  --color-panel-2: #efeae0;
+  --color-line: #ddd5c6;
+  --color-line-strong: #c4baa7;
+  --color-fg: #15181f;
+  --color-soft: #474e5c;
+  --color-mute: #777d8a;
+  --color-signal: #2a63e0;
+  --color-signal-soft: #2a63e01a;
+  --color-ahead: #6a55e6;
+  --color-ahead-soft: #6a55e61a;
+  color-scheme: light;
+}
+:root[data-theme="light"] .grid-field {
+  background-image:
+    linear-gradient(to right, #0000000a 1px, transparent 1px),
+    linear-gradient(to bottom, #0000000a 1px, transparent 1px);
+}
+html { transition: background-color .5s; }
+body { transition: background-color .5s, color .5s; }
+
 @layer base {
   html {
     scroll-behavior: smooth;
